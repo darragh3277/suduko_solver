@@ -1,6 +1,3 @@
-//Todo look into combining simple and complex check
-//Simple if poss == 1, complex if more than 1
-
 //easy puzzle
 // let puzzle = [
 //     [2, 6, 9, 0, 0, 0, 0, 0, 0],
@@ -53,10 +50,7 @@ class Suduko {
                 if (poss.length === 1) {
                     this.insert(col, row, poss[0]);
                     inserts = true;
-                } else {
-                    // if (this.complexCellSolve(col, row) === true){
-                    //     inserts = true;
-                    // } 
+                } else { 
                     for (let i = 0; i < poss.length; i++) {
                         if (this.getPossInColForVal(col, poss[i]).length === 1
                             || this.getPossInRowForVal(row, poss[i]).length === 1
