@@ -1,33 +1,35 @@
 //easy puzzle
-let puzzle = [
-    [2, 6, 9, 0, 0, 0, 0, 0, 0],
-    [0, 8, 1, 7, 0, 3, 0, 0, 4],
-    [4, 7, 0, 9, 2, 0, 1, 0, 5],
-    [6, 9, 4, 0, 5, 0, 2, 0, 0],
-    [0, 0, 2, 3, 9, 0, 5, 4, 0],
-    [0, 5, 0, 0, 8, 0, 0, 0, 0],
-    [0, 0, 5, 0, 0, 2, 4, 0, 9],
-    [9, 0, 6, 0, 0, 0, 0, 5, 2],
-    [7, 0, 0, 5, 0, 9, 3, 0, 0]
-];
+// let puzzle = [
+//     [2, 6, 9, 0, 0, 0, 0, 0, 0],
+//     [0, 8, 1, 7, 0, 3, 0, 0, 4],
+//     [4, 7, 0, 9, 2, 0, 1, 0, 5],
+//     [6, 9, 4, 0, 5, 0, 2, 0, 0],
+//     [0, 0, 2, 3, 9, 0, 5, 4, 0],
+//     [0, 5, 0, 0, 8, 0, 0, 0, 0],
+//     [0, 0, 5, 0, 0, 2, 4, 0, 9],
+//     [9, 0, 6, 0, 0, 0, 0, 5, 2],
+//     [7, 0, 0, 5, 0, 9, 3, 0, 0]
+// ];
 
 //hard puzzle
 // //does not work for this
-// let puzzle = [
-//     [9, 0, 0, 0, 0, 0, 0, 0, 0],
-//     [0, 0, 0, 0, 0, 1, 0, 0, 7],
-//     [5, 0, 0, 0, 0, 0, 3, 0, 4],
-//     [0, 0, 7, 0, 0, 0, 2, 0, 0],
-//     [0, 0, 3, 6, 0, 8, 0, 0, 0],
-//     [0, 0, 0, 4, 0, 0, 6, 1, 0],
-//     [0, 8, 5, 0, 4, 0, 0, 0, 0],
-//     [0, 0, 0, 3, 2, 0, 0, 6, 0],
-//     [0, 4, 0, 0, 1, 0, 0, 9, 0]
-// ];
+let puzzle = [
+    [9, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 1, 0, 0, 7],
+    [5, 0, 0, 0, 0, 0, 3, 0, 4],
+    [0, 0, 7, 0, 0, 0, 2, 0, 0],
+    [0, 0, 3, 6, 0, 8, 0, 0, 0],
+    [0, 0, 0, 4, 0, 0, 6, 1, 0],
+    [0, 8, 5, 0, 4, 0, 0, 0, 0],
+    [0, 0, 0, 3, 2, 0, 0, 6, 0],
+    [0, 4, 0, 0, 1, 0, 0, 9, 0]
+];
 
 class Suduko {
     constructor(puzzle) {
+        this.simpleCheck = true;
         this.puzzle = puzzle;
+        this.stop = 0;
     }
     display(target) {
         for (let i = 0; i < puzzle.length; i++) {
@@ -36,19 +38,56 @@ class Suduko {
     }
     isComplete() {
         for (let i = 0; i < this.puzzle.length; i++) {
-            if(this.puzzle[i].indexOf(0) !== -1) return false;
+            if (this.puzzle[i].indexOf(0) !== -1) return false;
         }
         return true;
     }
+    simpleCellSolve(col, row) {
+        let poss = this.getPossInCell(col, row);
+        if (poss.length === 1) {
+            this.insert(col, row, poss[0]);
+            return true;
+        }
+        return false;
+    }
+    complexCellSolve(col, row) {
+        let poss = this.getPossInCell(col, row);
+        for (let i = 0; i < poss.length; i++) {
+            if (this.getPossInColForVal(col, poss[i]).length === 1
+                || this.getPossInRowForVal(row, poss[i]).length === 1
+                || this.getPossInSquareForVal(col, row, poss[i]).length === 1) {
+                this.insert(col, row, poss[i]);
+                return true;
+            }
+        }
+        return false;
+    }
     solve() {
         if (this.isComplete()) return true;
-        for(let row = 0; row < this.puzzle.length; row++){
-            for(let col = 0; col < this.puzzle.length; col++){
-                if(this.isEmpty(col, row) === false) continue;
-                let poss = this.getPossibilities(col, row);
-                if (poss.length === 1) this.insert(col, row, poss[0]);
-                //if more poss check here
+        let inserts = 0;
+        for (let row = 0; row < this.puzzle.length; row++) {
+            for (let col = 0; col < this.puzzle.length; col++) {
+                if (this.isEmpty(col, row) === false) continue;
+                if (this.simpleCheck === true) {
+                    console.log("simple check...");
+                    if (this.simpleCellSolve(col, row)) inserts++;
+                } else {
+                    console.log("complex check...");
+                    console.log("col: " + col + " row " + row);
+                    if (this.complexCellSolve(col, row)) {
+                        inserts++;
+                    }
+                }
             }
+        }
+        this.simpleCheck = true;
+        if (inserts === 0) {
+            this.stop++;
+            this.simpleCheck = false;
+        }
+        if (this.stop === 5) {
+            console.log("stopping...");
+            return;
         }
         this.solve();
     }
@@ -90,13 +129,48 @@ class Suduko {
         }
         return bounds;
     }
-    getPossibilities(col, row) {
+    //get all the possible numbers that can fit in a cell
+    getPossInCell(col, row) {
         let poss = [];
-        for (let i = 1; i <= this.puzzle.length; i++){
+        for (let i = 1; i <= this.puzzle.length; i++) {
             if (this.checkFitsRow(row, i) === false) continue;
             if (this.checkFitsCol(col, i) === false) continue;
             if (this.checkFitsSquare(col, row, i) === false) continue;
             poss.push(i);
+        }
+        return poss;
+    }
+    //get all the possible cells in a row the val can fit
+    getPossInRowForVal(row, val) {
+        let poss = [];
+        for (let i = 0; i < this.puzzle[row].length; i++) {
+            if (this.isEmpty(i, row) === false) continue;
+            let cellPoss = this.getPossInCell(i, row);
+            if (cellPoss.indexOf(val) !== -1) poss.push([i, row]);
+        }
+        return poss;
+    }
+    //get all the possible cells in a col the val can fit
+    getPossInColForVal(col, val) {
+        let poss = [];
+        for (let i = 0; i < this.puzzle.length; i++) {
+            if (this.isEmpty(col, i) === false) continue;
+            let cellPoss = this.getPossInCell(col, i);
+            if (cellPoss.indexOf(val) !== -1) poss.push([col, i]);
+        }
+        return poss;
+    }
+    //get all the possible cells in a square the val can fit
+    getPossInSquareForVal(col, row, val) {
+        let poss = [];
+        let colBounds = this.getBounds(col);
+        let rowBounds = this.getBounds(row);
+        for (let row = rowBounds[0]; row <= rowBounds[1]; row++) {
+            for (let col = colBounds[0]; col <= colBounds[1]; col++) {
+                if (this.isEmpty(col, row) === false) continue;
+                let cellPoss = this.getPossInCell(col, row);
+                if (cellPoss.indexOf(val) !== -1) poss.push([col, row]);
+            }
         }
         return poss;
     }
