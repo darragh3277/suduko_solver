@@ -16,7 +16,7 @@
 let puzzle = [
     [9, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 1, 0, 0, 7],
-    [5, 0, 0, 0, 0, 0, 3, 0, 4],
+    [5, 0, 0, 0, 0, 3, 0, 0, 4], //[5, 0, 0, 0, 0, 3, 0, 0, 4], to test max stack
     [0, 0, 7, 0, 0, 0, 2, 0, 0],
     [0, 0, 3, 6, 0, 8, 0, 0, 0],
     [0, 0, 0, 4, 0, 0, 6, 1, 0],
@@ -29,7 +29,6 @@ class Suduko {
     constructor(puzzle) {
         this.simpleCheck = true;
         this.puzzle = puzzle;
-        this.stop = 0;
     }
     display(target) {
         for (let i = 0; i < puzzle.length; i++) {
@@ -69,26 +68,19 @@ class Suduko {
             for (let col = 0; col < this.puzzle.length; col++) {
                 if (this.isEmpty(col, row) === false) continue;
                 if (this.simpleCheck === true) {
-                    console.log("simple check...");
                     if (this.simpleCellSolve(col, row)) inserts++;
                 } else {
-                    console.log("complex check...");
-                    console.log("col: " + col + " row " + row);
                     if (this.complexCellSolve(col, row)) {
                         inserts++;
                     }
                 }
             }
         }
-        this.simpleCheck = true;
-        if (inserts === 0) {
-            this.stop++;
-            this.simpleCheck = false;
-        }
-        if (this.stop === 5) {
-            console.log("stopping...");
+        if(this.simpleCheck === false && inserts === 0) {
+            alert("Could not find solution");
             return;
         }
+        this.simpleCheck = inserts === 0 ? false : true;
         this.solve();
     }
     insert(col, row, val) {
