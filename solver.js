@@ -40,29 +40,38 @@ class Suduko {
         }
         return true;
     }
+    insertCellValue(col, row) {
+        //first get a list of all possible values for cell
+        //if there is only one possible value insert
+        //else do a more complex search. 
+        //complex checks if value can go elsewhere in col, row or square
+        //if value can only go in one cell in col, row or square insert
+        let poss = this.getPossInCell(col, row);
+        if (poss.length === 1) {
+            this.insert(col, row, poss[0]);
+            return true;
+        } else { 
+            for (let i = 0; i < poss.length; i++) {
+                if (this.getPossInColForVal(col, poss[i]).length === 1
+                    || this.getPossInRowForVal(row, poss[i]).length === 1
+                    || this.getPossInSquareForVal(col, row, poss[i]).length === 1) {
+                    this.insert(col, row, poss[i]);
+                    return true;
+                }
+            }
+        }
+    }
     solve() {
         if (this.isComplete()) return true;
         let inserts = false;
         for (let row = 0; row < this.puzzle.length; row++) {
             for (let col = 0; col < this.puzzle.length; col++) {
                 if (this.isEmpty(col, row) === false) continue;
-                let poss = this.getPossInCell(col, row);
-                if (poss.length === 1) {
-                    this.insert(col, row, poss[0]);
-                    inserts = true;
-                } else { 
-                    for (let i = 0; i < poss.length; i++) {
-                        if (this.getPossInColForVal(col, poss[i]).length === 1
-                            || this.getPossInRowForVal(row, poss[i]).length === 1
-                            || this.getPossInSquareForVal(col, row, poss[i]).length === 1) {
-                            this.insert(col, row, poss[i]);
-                            inserts = true;
-                            break;
-                        }
-                    }
-                }
+                if(this.insertCellValue(col, row) === true) inserts = true;
             }
         }
+        //if no values were input in an iteration and puzzle isn't complete
+        //algorithm fails
         if (inserts === false) {
             alert("No solution found");
             return;
