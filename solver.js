@@ -12,18 +12,18 @@ let puzzle = [
 ];
 
 //hard puzzle
-//does not work for this
-let puzzle = [
-    [9, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 1, 0, 0, 7],
-    [5, 0, 0, 0, 0, 0, 3, 0, 4],
-    [0, 0, 7, 0, 0, 0, 2, 0, 0],
-    [0, 0, 3, 6, 0, 8, 0, 0, 0],
-    [0, 0, 0, 4, 0, 0, 6, 1, 0],
-    [0, 8, 5, 0, 4, 0, 0, 0, 0],
-    [0, 0, 0, 3, 2, 0, 0, 6, 0],
-    [0, 4, 0, 0, 1, 0, 0, 9, 0]
-];
+// //does not work for this
+// let puzzle = [
+//     [9, 0, 0, 0, 0, 0, 0, 0, 0],
+//     [0, 0, 0, 0, 0, 1, 0, 0, 7],
+//     [5, 0, 0, 0, 0, 0, 3, 0, 4],
+//     [0, 0, 7, 0, 0, 0, 2, 0, 0],
+//     [0, 0, 3, 6, 0, 8, 0, 0, 0],
+//     [0, 0, 0, 4, 0, 0, 6, 1, 0],
+//     [0, 8, 5, 0, 4, 0, 0, 0, 0],
+//     [0, 0, 0, 3, 2, 0, 0, 6, 0],
+//     [0, 4, 0, 0, 1, 0, 0, 9, 0]
+// ];
 
 class Suduko {
     constructor(puzzle) {
@@ -47,6 +47,7 @@ class Suduko {
                 if(this.isEmpty(col, row) === false) continue;
                 let poss = this.getPossibilities(col, row);
                 if (poss.length === 1) this.insert(col, row, poss[0]);
+                //if more poss check here
             }
         }
         this.solve();
@@ -55,27 +56,27 @@ class Suduko {
         this.puzzle[row][col] = val;
     }
     //if square empty return true;
-    isEmpty(x, y) {
-        return puzzle[y][x] === 0;
+    isEmpty(col, row) {
+        return puzzle[row][col] === 0;
     }
     //if n is in row return false 
-    checkFitsRow(row, n) {
-        return puzzle[row].indexOf(n) === -1;
+    checkFitsRow(row, val) {
+        return puzzle[row].indexOf(val) === -1;
     }
     //if n is in col return false 
-    checkFitsCol(x, n) {
+    checkFitsCol(col, val) {
         for (let i = 0; i < puzzle.length; i++) {
-            if (puzzle[i][x] === n) return false;
+            if (puzzle[i][col] === val) return false;
         }
         return true;
     }
     //if n is in square return false
-    checkFitsSquare = (x, y, n) => {
-        let xbounds = this.getBounds(x);
-        let ybounds = this.getBounds(y);
-        for (let i = ybounds[0]; i <= ybounds[1]; i++) {
-            let pos = puzzle[i].indexOf(n);
-            if (pos >= xbounds[0] && pos <= xbounds[1]) return false;
+    checkFitsSquare = (col, row, val) => {
+        let colBounds = this.getBounds(col);
+        let rowBounds = this.getBounds(row);
+        for (let i = rowBounds[0]; i <= rowBounds[1]; i++) {
+            let pos = puzzle[i].indexOf(val);
+            if (pos >= colBounds[0] && pos <= colBounds[1]) return false;
         }
         return true;
     }
@@ -89,12 +90,12 @@ class Suduko {
         }
         return bounds;
     }
-    getPossibilities(x, y) {
+    getPossibilities(col, row) {
         let poss = [];
-        for (let i = 1; i <= 9; i++){
-            if (this.checkFitsRow(y, i) === false) continue;
-            if (this.checkFitsCol(x, i) === false) continue;
-            if (this.checkFitsSquare(x, y, i) === false) continue;
+        for (let i = 1; i <= this.puzzle.length; i++){
+            if (this.checkFitsRow(row, i) === false) continue;
+            if (this.checkFitsCol(col, i) === false) continue;
+            if (this.checkFitsSquare(col, row, i) === false) continue;
             poss.push(i);
         }
         return poss;
