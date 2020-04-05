@@ -27,7 +27,6 @@ let puzzle = [
 
 class Suduko {
     constructor(puzzle) {
-        this.simpleCheck = true;
         this.puzzle = puzzle;
     }
     display(target) {
@@ -41,46 +40,42 @@ class Suduko {
         }
         return true;
     }
-    simpleCellSolve(col, row) {
+    insertCellValue(col, row) {
+        //first get a list of all possible values for cell
+        //if there is only one possible value insert
+        //else do a more complex search. 
+        //complex checks if value can go elsewhere in col, row or square
+        //if value can only go in one cell in col, row or square insert
         let poss = this.getPossInCell(col, row);
         if (poss.length === 1) {
             this.insert(col, row, poss[0]);
             return true;
-        }
-        return false;
-    }
-    complexCellSolve(col, row) {
-        let poss = this.getPossInCell(col, row);
-        for (let i = 0; i < poss.length; i++) {
-            if (this.getPossInColForVal(col, poss[i]).length === 1
-                || this.getPossInRowForVal(row, poss[i]).length === 1
-                || this.getPossInSquareForVal(col, row, poss[i]).length === 1) {
-                this.insert(col, row, poss[i]);
-                return true;
-            }
-        }
-        return false;
-    }
-    solve() {
-        if (this.isComplete()) return true;
-        let inserts = 0;
-        for (let row = 0; row < this.puzzle.length; row++) {
-            for (let col = 0; col < this.puzzle.length; col++) {
-                if (this.isEmpty(col, row) === false) continue;
-                if (this.simpleCheck === true) {
-                    if (this.simpleCellSolve(col, row)) inserts++;
-                } else {
-                    if (this.complexCellSolve(col, row)) {
-                        inserts++;
-                    }
+        } else { 
+            for (let i = 0; i < poss.length; i++) {
+                if (this.getPossInColForVal(col, poss[i]).length === 1
+                    || this.getPossInRowForVal(row, poss[i]).length === 1
+                    || this.getPossInSquareForVal(col, row, poss[i]).length === 1) {
+                    this.insert(col, row, poss[i]);
+                    return true;
                 }
             }
         }
-        if(this.simpleCheck === false && inserts === 0) {
-            alert("Could not find solution");
+    }
+    solve() {
+        if (this.isComplete()) return true;
+        let inserts = false;
+        for (let row = 0; row < this.puzzle.length; row++) {
+            for (let col = 0; col < this.puzzle.length; col++) {
+                if (this.isEmpty(col, row) === false) continue;
+                if(this.insertCellValue(col, row) === true) inserts = true;
+            }
+        }
+        //if no values were input in an iteration and puzzle isn't complete
+        //algorithm fails
+        if (inserts === false) {
+            alert("No solution found");
             return;
         }
-        this.simpleCheck = inserts === 0 ? false : true;
         this.solve();
     }
     insert(col, row, val) {
