@@ -1,42 +1,38 @@
-//easy puzzle
-// let puzzle = [
-//     [2, 6, 9, 0, 0, 0, 0, 0, 0],
-//     [0, 8, 1, 7, 0, 3, 0, 0, 4],
-//     [4, 7, 0, 9, 2, 0, 1, 0, 5],
-//     [6, 9, 4, 0, 5, 0, 2, 0, 0],
-//     [0, 0, 2, 3, 9, 0, 5, 4, 0],
-//     [0, 5, 0, 0, 8, 0, 0, 0, 0],
-//     [0, 0, 5, 0, 0, 2, 4, 0, 9],
-//     [9, 0, 6, 0, 0, 0, 0, 5, 2],
-//     [7, 0, 0, 5, 0, 9, 3, 0, 0]
-// ];
-
-//hard puzzle
-// //does not work for this
-let puzzle = [
-    [9, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 1, 0, 0, 7],
-    [5, 0, 0, 0, 0, 3, 0, 0, 4], //[5, 0, 0, 0, 0, 3, 0, 0, 4], to test max stack
-    [0, 0, 7, 0, 0, 0, 2, 0, 0],
-    [0, 0, 3, 6, 0, 8, 0, 0, 0],
-    [0, 0, 0, 4, 0, 0, 6, 1, 0],
-    [0, 8, 5, 0, 4, 0, 0, 0, 0],
-    [0, 0, 0, 3, 2, 0, 0, 6, 0],
-    [0, 4, 0, 0, 1, 0, 0, 9, 0]
-];
-
 class Suduko {
-    constructor(puzzle) {
-        this.puzzle = puzzle;
+    constructor(unsolvedPuzzle) {
+        this.unsolvedPuzzle = unsolvedPuzzle;
     }
-    display(target) {
-        for (let i = 0; i < puzzle.length; i++) {
-            target.innerHTML += puzzle[i] + "<br>";
+    getUnsolvedPuzzle() {
+        return this.unsolvedPuzzle;
+    }
+    getSolvedPuzzle() {
+        if (this.solvedPuzzle === undefined) {
+            //need to clone the array so you don't overwrite original
+            this.solvedPuzzle = this.unsolvedPuzzle.map(inner => inner.slice())
+            this.solve();
         }
+        return this.solvedPuzzle;
+    }
+    solve() {
+        if (this.isComplete()) return; //return when complete
+        let inserts = false;
+        for (let row = 0; row < this.solvedPuzzle.length; row++) {
+            for (let col = 0; col < this.solvedPuzzle.length; col++) {
+                if (this.isEmpty(col, row) === false) continue;
+                if(this.insertCellValue(col, row) === true) inserts = true;
+            }
+        }
+        //if no values were input in an iteration and puzzle isn't complete
+        //algorithm fails
+        if (inserts === false) {
+            alert("No solution found");
+            return;
+        }
+        this.solve();
     }
     isComplete() {
-        for (let i = 0; i < this.puzzle.length; i++) {
-            if (this.puzzle[i].indexOf(0) !== -1) return false;
+        for (let i = 0; i < this.solvedPuzzle.length; i++) {
+            if (this.solvedPuzzle[i].indexOf(0) !== -1) return false;
         }
         return true;
     }
@@ -61,38 +57,21 @@ class Suduko {
             }
         }
     }
-    solve() {
-        if (this.isComplete()) return true;
-        let inserts = false;
-        for (let row = 0; row < this.puzzle.length; row++) {
-            for (let col = 0; col < this.puzzle.length; col++) {
-                if (this.isEmpty(col, row) === false) continue;
-                if(this.insertCellValue(col, row) === true) inserts = true;
-            }
-        }
-        //if no values were input in an iteration and puzzle isn't complete
-        //algorithm fails
-        if (inserts === false) {
-            alert("No solution found");
-            return;
-        }
-        this.solve();
-    }
     insert(col, row, val) {
-        this.puzzle[row][col] = val;
+        this.solvedPuzzle[row][col] = val;
     }
     //if square empty return true;
     isEmpty(col, row) {
-        return puzzle[row][col] === 0;
+        return this.solvedPuzzle[row][col] === 0;
     }
     //if n is in row return false 
     checkFitsRow(row, val) {
-        return puzzle[row].indexOf(val) === -1;
+        return this.solvedPuzzle[row].indexOf(val) === -1;
     }
     //if n is in col return false 
     checkFitsCol(col, val) {
-        for (let i = 0; i < puzzle.length; i++) {
-            if (puzzle[i][col] === val) return false;
+        for (let i = 0; i < this.solvedPuzzle.length; i++) {
+            if (this.solvedPuzzle[i][col] === val) return false;
         }
         return true;
     }
@@ -101,11 +80,12 @@ class Suduko {
         let colBounds = this.getBounds(col);
         let rowBounds = this.getBounds(row);
         for (let i = rowBounds[0]; i <= rowBounds[1]; i++) {
-            let pos = puzzle[i].indexOf(val);
+            let pos = this.solvedPuzzle[i].indexOf(val);
             if (pos >= colBounds[0] && pos <= colBounds[1]) return false;
         }
         return true;
     }
+    //get cords of square
     getBounds = (val) => {
         let bounds = [3, 5];
         if (val <= 2) {
@@ -119,7 +99,7 @@ class Suduko {
     //get all the possible numbers that can fit in a cell
     getPossInCell(col, row) {
         let poss = [];
-        for (let i = 1; i <= this.puzzle.length; i++) {
+        for (let i = 1; i <= this.solvedPuzzle.length; i++) {
             if (this.checkFitsRow(row, i) === false) continue;
             if (this.checkFitsCol(col, i) === false) continue;
             if (this.checkFitsSquare(col, row, i) === false) continue;
@@ -130,7 +110,7 @@ class Suduko {
     //get all the possible cells in a row the val can fit
     getPossInRowForVal(row, val) {
         let poss = [];
-        for (let i = 0; i < this.puzzle[row].length; i++) {
+        for (let i = 0; i < this.solvedPuzzle[row].length; i++) {
             if (this.isEmpty(i, row) === false) continue;
             let cellPoss = this.getPossInCell(i, row);
             if (cellPoss.indexOf(val) !== -1) poss.push([i, row]);
@@ -140,7 +120,7 @@ class Suduko {
     //get all the possible cells in a col the val can fit
     getPossInColForVal(col, val) {
         let poss = [];
-        for (let i = 0; i < this.puzzle.length; i++) {
+        for (let i = 0; i < this.solvedPuzzle.length; i++) {
             if (this.isEmpty(col, i) === false) continue;
             let cellPoss = this.getPossInCell(col, i);
             if (cellPoss.indexOf(val) !== -1) poss.push([col, i]);
@@ -162,10 +142,3 @@ class Suduko {
         return poss;
     }
 }
-
-let suduko = new Suduko(puzzle);
-let unsolvedEl = document.getElementById("puzzle");
-let solvedEl = document.getElementById("puzzle_solved");
-suduko.display(unsolvedEl);
-suduko.solve();
-suduko.display(solvedEl);
