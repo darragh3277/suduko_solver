@@ -1,4 +1,40 @@
-<div id="puzzle"></div>
-<br>
-<div id="puzzle_solved"></div>
-<script src="solver.js"></script>
+<html>
+
+<head>
+    <script src="solver.js"></script>
+    <script type="text/javascript">
+        let puzzle = [
+            [9, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 1, 0, 0, 7],
+            [5, 0, 0, 0, 0, 3, 0, 0, 4], 
+            [0, 0, 7, 0, 0, 0, 2, 0, 0],
+            [0, 0, 3, 6, 0, 8, 0, 0, 0],
+            [0, 0, 0, 4, 0, 0, 6, 1, 0],
+            [0, 8, 5, 0, 4, 0, 0, 0, 0],
+            [0, 0, 0, 3, 2, 0, 0, 6, 0],
+            [0, 4, 0, 0, 1, 0, 0, 9, 0]
+        ];
+        let solve = function () {
+            let suduko = new Suduko(puzzle);
+            let unsolved = suduko.getUnsolvedPuzzle();
+            let solved = suduko.getSolvedPuzzle();
+            let unsolvedEl = document.getElementById("puzzle");
+            let solvedEl = document.getElementById("puzzle_solved");
+            for (let i = 0; i < unsolved.length; i++) {
+                unsolvedEl.innerHTML += unsolved[i] + "<br>";
+            }
+            for (let i = 0; i < solved.length; i++) {
+                solvedEl.innerHTML += solved[i] + "<br>";
+            }
+
+        }
+    </script>
+</head>
+
+<body onload="solve()">
+    <div id="puzzle"></div>
+    <br>
+    <div id="puzzle_solved"></div>
+</body>
+
+</html>
